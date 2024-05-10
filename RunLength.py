@@ -47,7 +47,7 @@ class RunLengthEncoder:
                     if count > biggest_vector:
                         biggest_vector = count
 
-                    encoded_string += str(count) + prev_char + "," 
+                    encoded_string += str(count) + prev_char
                     number_of_vectors += 1
 
                     count = 1
