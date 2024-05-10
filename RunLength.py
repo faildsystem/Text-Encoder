@@ -75,7 +75,7 @@ class RunLengthEncoder:
         entropy = Functions.calc_entropy(char_prob) 
 
         return {
-            "encoded_string": encoded_string,
+            "encoded_text": encoded_string,
             "number_of_vectors": number_of_vectors,
             "biggest_vector": biggest_vector,
             "bits_before": bits_before,

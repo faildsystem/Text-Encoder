@@ -38,4 +38,3 @@ class Functions:
                 entropy_val -= prob * math.log2(prob)
         return entropy_val
     
-    

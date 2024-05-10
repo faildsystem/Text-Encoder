@@ -42,7 +42,7 @@ class ArithmeticEncoder:
         entropy = Functions.calc_entropy(probability_table)
 
         return {
-            "encoded_value": encoded_value,
+            "encoded_text": encoded_value,
             "bits_before": bits_before,
             "bits_after": bits_after,
             "compression ratio (%)": compression_ratio,
