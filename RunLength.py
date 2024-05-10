@@ -1,8 +1,22 @@
 from functions import Functions
+import math
 
 
 class RunLengthEncoder:
+    
+    def bits_after_RLE(number_of_vectors, biggest_vector):
+        """
+        Calculate the number of bits needed to store the vectors after RLE.
 
+        Args:
+            number_of_vectors: The number of vectors.
+            biggest_vector: The biggest vector.
+
+        Returns:
+            The number of bits needed to store the vectors after RLE.    
+        """
+        return number_of_vectors * (8 + math.ceil(math.log2(biggest_vector + 1)))
+    
     @staticmethod
     def RLE_encoding(text):
         """
@@ -29,55 +43,46 @@ class RunLengthEncoder:
             PermissionError: If the user does not have permission to read the file.
             Exception: For any other errors.
         """
-        try:
-            if not text:
-                raise ValueError("Input text is empty.")
+        encoded_string = ""
+        count = 1
+        bits_before = len(text) * 8
+        number_of_vectors = 0
+        biggest_vector = 0
+        prev_char = text[0]
 
-            encoded_string = ""
-            count = 1
-            bits_before = len(text) * 8
-            number_of_vectors = 0
-            biggest_vector = 0
-            prev_char = text[0]
+        for char in text[1:]:
+            if char == prev_char:
+                count += 1
+            else:
+                if count > biggest_vector:
+                    biggest_vector = count
 
-            for char in text[1:]:
-                if char == prev_char:
-                    count += 1
-                else:
-                    if count > biggest_vector:
-                        biggest_vector = count
+                encoded_string += str(count) + prev_char
+                number_of_vectors += 1
 
-                    encoded_string += str(count) + prev_char
-                    number_of_vectors += 1
+                count = 1
+                prev_char = char
 
-                    count = 1
-                    prev_char = char
+        # Handling the last character
+        if count > biggest_vector:
+            biggest_vector = count
 
-            # Handling the last character
-            if count > biggest_vector:
-                biggest_vector = count
+        encoded_string += str(count) + prev_char
+        number_of_vectors += 1
 
-            encoded_string += str(count) + prev_char
-            number_of_vectors += 1
+        bits_after = RunLengthEncoder.bits_after_RLE(number_of_vectors, biggest_vector)  
+        char_prob = Functions.calc_probabilities(text)
+        entropy = Functions.calc_entropy(char_prob) 
 
-            bits_after = Functions.bits_after_RLE(number_of_vectors, biggest_vector)  
-            char_prob = Functions.calc_probabilities(text, len(text))
-            entropy = Functions.calc_entropy(char_prob) 
-
-            return {
-                "encoded_string": encoded_string,
-                "number_of_vectors": number_of_vectors,
-                "biggest_vector": biggest_vector,
-                "bits_before": bits_before,
-                "bits_after": bits_after,
-                "compression ratio (%)": round(bits_before / bits_after * 100, 1),
-                "probabilities": char_prob,
-                "entropy": round(entropy, 3),
-                "average_length": 8,
-                "efficiency": round(entropy / 8 * 100, 1),
-            }
-
-        except ValueError as ve:
-            print("Error:", ve)
-        except Exception as e:
-            print("Error:", e)
+        return {
+            "encoded_string": encoded_string,
+            "number_of_vectors": number_of_vectors,
+            "biggest_vector": biggest_vector,
+            "bits_before": bits_before,
+            "bits_after": bits_after,
+            "compression ratio (%)": round(bits_before / bits_after * 100, 1),
+            "probabilities": char_prob,
+            "entropy": round(entropy, 3),
+            "average_length": 8,
+            "efficiency": round(entropy / 8 * 100, 1),
+        }
