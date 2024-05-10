@@ -3,7 +3,7 @@ from collections import Counter
 
 class Functions:
     @staticmethod
-    def calc_probabilities(text, length):
+    def calc_probabilities(text):
         """
         Calculate the probabilities of each character in the file.
 
@@ -14,6 +14,7 @@ class Functions:
         Returns:
             A dictionary where the keys are characters and the values are the probabilities of each character.
         """
+        length = len(text)
         char_counter = Counter(text)
         char_prob = {}
         for ch, count in char_counter.items():
