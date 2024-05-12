@@ -1,160 +1,88 @@
 import math
 
-def lzw_compress(text):
-    if not text:
-        return []
+class LZWEncoder:
+    def __init__(self, text):
+        self.text = text
+        self.encoded_string = self.compress()
+        self.bits_before = self.compute_bits_before()
+        self.bits_after = self.compute_bits_after()
+        self.compression_ratio = self.compute_cr()
+        self.probabilities = self.compute_probabilities()
+        self.entropy = self.compute_entropy()
+        self.efficiency = self.compute_efficiency()
 
-    dictionary = {chr(i): i for i in range(128)}
-    current_code = 128
-    compressed = []
-    current_string = ""
+    def compress(self):
+        if not self.text:
+            return []
 
-    for char in text:
-        if current_string + char in dictionary:
-            current_string += char
-        else:
-            compressed.append(dictionary[current_string])
-            # Assign the code corresponding to the prefix of the new sequence
-            dictionary[current_string + char] = current_code
-            current_code += 1
-            # Update current string for the next iteration
-            current_string = char
+        dictionary = {chr(i): i for i in range(128)}
+        current_code = 128
+        compressed = []
+        current_string = ""
 
-    if current_string:
-        compressed.append(dictionary[current_string])
-
-    return compressed
-
-
-
-def lzw_decompress(compressed):
-    if not compressed:
-        return ""
-
-    dictionary = {i: chr(i) for i in range(128)}  # ASCII characters from 0 to 127
-    current_code = 128  # Start new codes from 128
-    decompressed = []
-
-    previous = chr(compressed.pop(0))
-    decompressed.append(previous)
-
-    for code in compressed:
-        if code in dictionary:
-            entry = dictionary[code]
-        elif code == current_code:
-            entry = previous + previous[0]
-        else:
-            raise ValueError("Bad compressed sequence")
-
-        decompressed.append(entry)
-
-        if current_code < 256:  # Max code value in 0-128 range
-            dictionary[current_code] = previous + entry[0]
-            current_code += 1
-
-        previous = entry
-
-    return ''.join(decompressed)
-
-
-def compute_original_size(original_data):
-    if isinstance(original_data, str):
-        
-        result = 0
-        for char in str(original_data):
-            if char.isdigit():
-                result += 1
-            elif char.isalpha():
-                result += 8
+        for char in self.text:
+            if current_string + char in dictionary:
+                current_string += char
             else:
-                print(f"Unsupported character '{char}'")
-                raise ValueError("Unsupported character")
-        return result  
-    elif isinstance(original_data, (int, float)):
-        return math.ceil(math.log2(original_data + 1))  
-    else:
-        print("Unsupported data type for original data")
-        raise ValueError("Unsupported data type for original data")
-    
+                compressed.append(dictionary[current_string])
+                dictionary[current_string + char] = current_code
+                current_code += 1
+                current_string = char
 
-def compute_cr(original_data, compressed_data):
-    original_size = compute_original_size(original_data)
+        if current_string:
+            compressed.append(dictionary[current_string])
 
- 
+        return compressed
 
-    encoding = math.ceil(math.log2(max(compressed_data) + 1))
-    compressed_size = (len(compressed_data)+1) * encoding  
-    print("Bits before:" ,original_size)
-    print("encoding:" ,encoding)
-    print("compressed_size:" ,len(compressed_data)+1)
+    def compute_bits_before(self):
+        bits_before = 0
+        for char in self.text:
+            if char.isdigit():
+                bits_before += 1
+            elif char.isalpha():
+                bits_before += 8
+        return bits_before
 
-    print("Bits After:" ,compressed_size)
+    def compute_bits_after(self):
+        encoding = math.ceil(math.log2(max(self.encoded_string) + 1))
+        bits_after = (len(self.encoded_string) ) * encoding
+        return bits_after
 
-    return original_size / compressed_size if compressed_size > 0 else 0
+    def compute_cr(self):
+        original_size = self.bits_before
+        compressed_size = self.bits_after
+        return original_size / compressed_size if compressed_size > 0 else 0
 
+    def compute_probabilities(self):
+        freq_map = {}
+        total_symbols = 0
+        for symbol in self.text:
+            freq_map[symbol] = freq_map.get(symbol, 0) + 1
+            total_symbols += 1
+        char_prob = {symbol: freq / total_symbols for symbol, freq in freq_map.items()}
+        return char_prob
 
-def freq(Text):
-    freq_map = {}
-    total_symbols = 0
-    for symbol in Text:
-        freq_map[symbol] = freq_map.get(symbol, 0) + 1
-        total_symbols += 1
-    return freq_map
-lol=freq("wabbawabba")
-lol
+    def compute_entropy(self):
+        entropy = 0
+        total_symbols = len(self.text)
+        char_prob = self.probabilities
+        for freq in char_prob.values():
+            entropy -= freq * math.log2(freq)
+        return entropy
 
+    def compute_efficiency(self):
+        original_size = self.bits_before
+        compressed_size = self.bits_after
+        return ((original_size - compressed_size) / original_size) * 100 if original_size > 0 else 0
 
-def compute_entropy(data):
-    if not data:
-        return 0
-    
-    freq_map = {}
-    total_symbols = 0
-    for symbol in data:
-        freq_map[symbol] = freq_map.get(symbol, 0) + 1
-        total_symbols += 1
-    
-    entropy = 0
-    for freq in freq_map.values():
-        probability = freq / total_symbols 
-        entropy -= probability * math.log2(probability)
-    
-    return entropy
-
-
-def compute_efficiency(compressed_data,data):
-    
-    if not compressed_data:
-        return 0
-    
-    encoding = math.ceil(math.log2(max(compressed_data) + 1))
-    compressed_size = (len(compressed_data)+1) * encoding  
-    original_size = compute_original_size(data)
-
-    
-    print("compressed_size" ,compressed_size)
-    print("original_size:" ,original_size)
-  
-    if original_size > 0:
-        return ((original_size-compressed_size) / original_size)*100
-    else:
-        print("original_size is zero")
-        return 0
-    
-
-#text = "ABAABABBAABAABAAAABABBBBBBBB" 
-text="wabbawabba"
-compressed = lzw_compress(text)
-print("Compressed:", compressed)
-
-decompressed = lzw_decompress(compressed)
-print("Decompressed:", decompressed)
-
-
-cr = compute_cr(text, compressed)
-entropy = compute_entropy(text)
-efficiency = compute_efficiency(compressed,text)
-
-print("Compression Ratio (CR):", round(cr,4))
-print("Entropy:", round(entropy,4))
-print("Efficiency:", round(efficiency,4),"%")
+    def get_results(self):
+        return {
+            "encoded_text": self.encoded_string,
+            "bits_before": self.bits_before,
+            "bits_after": self.bits_after,
+            "average_length": '',
+            "compression ratio (%)": round(self.compression_ratio * 100, 1),
+            "probabilities": self.probabilities,
+            "entropy": round(self.entropy, 3),
+            "efficiency": round(self.efficiency, 1),
+        }

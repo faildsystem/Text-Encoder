@@ -4,19 +4,15 @@ import math
 
 class RunLengthEncoder:
     
-    def bits_after_RLE(number_of_vectors, biggest_vector):
-        """
-        Calculate the number of bits needed to store the vectors after RLE.
+    def bits_before_RLE(text):
+        bits_before = 0
+        for char in text:
+            if char.isdigit():
+                bits_before += 1
+            elif char.isalpha():
+                bits_before += 8
+        return bits_before
 
-        Args:
-            number_of_vectors: The number of vectors.
-            biggest_vector: The biggest vector.
-
-        Returns:
-            The number of bits needed to store the vectors after RLE.    
-        """
-        return number_of_vectors * (8 + math.ceil(math.log2(biggest_vector + 1)))
-    
     @staticmethod
     def RLE_encoding(text):
         """
@@ -45,7 +41,6 @@ class RunLengthEncoder:
         """
         encoded_string = ""
         count = 1
-        bits_before = len(text) * 8
         number_of_vectors = 0
         biggest_vector = 0
         prev_char = text[0]
@@ -69,10 +64,12 @@ class RunLengthEncoder:
 
         encoded_string += str(count) + prev_char
         number_of_vectors += 1
-
-        bits_after = RunLengthEncoder.bits_after_RLE(number_of_vectors, biggest_vector)  
+        
+        bits_before = RunLengthEncoder.bits_before_RLE(text)
+        bits_after = number_of_vectors * (8 + math.ceil(math.log2(biggest_vector + 1)))
         char_prob = Functions.calc_probabilities(text)
         entropy = Functions.calc_entropy(char_prob) 
+        efficiency = ((bits_before - bits_after) / bits_before) * 100
 
         return {
             "encoded_text": encoded_string,
@@ -80,9 +77,9 @@ class RunLengthEncoder:
             "biggest_vector": biggest_vector,
             "bits_before": bits_before,
             "bits_after": bits_after,
-            "compression ratio (%)": round(bits_before / bits_after * 100, 1),
+            "compression ratio (%)": round((bits_before / bits_after) * 100, 1),
             "probabilities": char_prob,
             "entropy": round(entropy, 3),
-            "average_length": 8,
-            "efficiency": round(entropy / 8 * 100, 1),
+            "average_length":  round(bits_after / len(text), 2),
+            "efficiency": round(efficiency, 1),
         }
