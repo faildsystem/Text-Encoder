@@ -41,7 +41,7 @@ class GolombEncoder:
         encoded_string = unary + binary
         bits_before = len(text) * 8
         bits_after = len(encoded_string)
-
+        average_length = (bits_after - len(unary)) / len(text)
         char_prob = Functions.calc_probabilities(text)
         entropy = Functions.calc_entropy(char_prob) 
 
@@ -50,8 +50,8 @@ class GolombEncoder:
             "bits_before": bits_before,
             "bits_after": bits_after,
             "entropy": round(entropy, 3),
-            "average_length": 8,
+            "average_length": round(average_length, 3),
             "compression ratio (%)": round(bits_before / bits_after * 100, 1),
-            "efficiency": round(entropy / 8 * 100, 1),
+            "efficiency": round((entropy / 8 )* 100, 1),
             "probabilities": char_prob,
         }

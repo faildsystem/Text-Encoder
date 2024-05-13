@@ -93,9 +93,9 @@ class ArithmeticEncoder:
             'encoded_text': encoded_msg,  
             'bits_before': bits_before,
             'bits_after': bits_after,
-            'compression ratio (%)': round(bits_before / bits_after * 100, 1),
+            'compression ratio (%)': round((bits_before / bits_after) * 100, 1),
             'average_length': round(average_length, 2),
             'probabilities': probabilities,
             'entropy': round(entropy, 3),
-            'efficiency': round(entropy / 8 * 100, 1)
+            'efficiency': round((entropy / average_length) * 100, 1)
         }

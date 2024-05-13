@@ -109,12 +109,6 @@ class HuffmanEncoder:
         bits_after = self.bits_after()
         compression_ratio = (bits_after / bits_before) * 100
         return compression_ratio
-    
-    def efficiency(self):
-        # Calculate the efficiency of the Huffman coding
-        bits_before = self.bits_before()
-        bits_after = self.bits_after()
-        return (bits_before - bits_after) / bits_before
 
     def probabilities(self):
         # Return the probabilities of characters
@@ -130,7 +124,7 @@ class HuffmanEncoder:
         compression_ratio = self.compression_ratio()
         probabilities = self.probabilities()
         entropy = self.calc_entropy()
-        efficiency = self.efficiency()
+        efficiency = entropy / avg_length
 
         return {
             "encoded_text": encoded_text,
