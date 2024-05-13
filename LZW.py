@@ -10,6 +10,7 @@ class LZWEncoder:
         self.probabilities = self.compute_probabilities()
         self.entropy = self.compute_entropy()
         self.efficiency = self.compute_efficiency()
+        self.average_length = self.bits_after / len(self.text) if len(self.text) > 0 else 0
 
     def compress(self):
         if not self.text:
@@ -80,7 +81,7 @@ class LZWEncoder:
             "encoded_text": self.encoded_string,
             "bits_before": self.bits_before,
             "bits_after": self.bits_after,
-            "average_length": '',
+            "average_length": round(self.average_length, 2),
             "compression ratio (%)": round(self.compression_ratio * 100, 1),
             "probabilities": self.probabilities,
             "entropy": round(self.entropy, 3),

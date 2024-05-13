@@ -2,16 +2,24 @@ from functions import Functions
 import math
 
 
+from functions import Functions
+import math
+
+
 class RunLengthEncoder:
     
-    def bits_before_RLE(text):
-        bits_before = 0
-        for char in text:
-            if char.isdigit():
-                bits_before += 1
-            elif char.isalpha():
-                bits_before += 8
-        return bits_before
+    def bits_before_RLE(text, bits=8):
+        """
+        Calculate the number of bits before RLE.
+
+        Args:
+            text: The text to calculate the number of bits for.
+            bits: The number of bits per character.
+        
+        Returns:
+            The number of bits before RLE.
+        """
+        return len(text) * bits
 
     @staticmethod
     def RLE_encoding(text):
@@ -39,6 +47,7 @@ class RunLengthEncoder:
             PermissionError: If the user does not have permission to read the file.
             Exception: For any other errors.
         """
+        bits = 1 if text.isdigit() else 8
         encoded_string = ""
         count = 1
         number_of_vectors = 0
@@ -52,7 +61,7 @@ class RunLengthEncoder:
                 if count > biggest_vector:
                     biggest_vector = count
 
-                encoded_string += str(count) + prev_char
+                encoded_string += str(count) + prev_char + ","
                 number_of_vectors += 1
 
                 count = 1
@@ -65,11 +74,13 @@ class RunLengthEncoder:
         encoded_string += str(count) + prev_char
         number_of_vectors += 1
         
-        bits_before = RunLengthEncoder.bits_before_RLE(text)
-        bits_after = number_of_vectors * (8 + math.ceil(math.log2(biggest_vector + 1)))
+        bits_before = RunLengthEncoder.bits_before_RLE(text, bits)
+        bits_after = number_of_vectors * (bits + math.ceil(math.log2(biggest_vector + 1))) + number_of_vectors * 8
         char_prob = Functions.calc_probabilities(text)
         entropy = Functions.calc_entropy(char_prob) 
-        efficiency = ((bits_before - bits_after) / bits_before) * 100
+        compression_ratio = round((bits_before / bits_after) * 100, 2)
+        average_length = math.ceil(math.log2(biggest_vector + 1))
+        efficiency = (entropy / average_length) * 100
 
         return {
             "encoded_text": encoded_string,
@@ -77,9 +88,9 @@ class RunLengthEncoder:
             "biggest_vector": biggest_vector,
             "bits_before": bits_before,
             "bits_after": bits_after,
-            "compression ratio (%)": round((bits_before / bits_after) * 100, 1),
+            "compression ratio (%)": round(compression_ratio, 1),
             "probabilities": char_prob,
             "entropy": round(entropy, 3),
-            "average_length":  round(bits_after / len(text), 2),
+            "average_length": average_length,
             "efficiency": round(efficiency, 1),
         }
