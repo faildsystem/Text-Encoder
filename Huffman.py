@@ -114,7 +114,7 @@ class HuffmanEncoder:
         # Calculate the efficiency of the Huffman coding
         bits_before = self.bits_before()
         bits_after = self.bits_after()
-        return ((bits_before - bits_after) / bits_before) * 100 
+        return (bits_before - bits_after) / bits_before
 
     def probabilities(self):
         # Return the probabilities of characters
@@ -140,5 +140,5 @@ class HuffmanEncoder:
             "compression ratio (%)": round(compression_ratio, 1),
             "probabilities": probabilities,
             "entropy": round(entropy, 3),
-            "efficiency": round(efficiency, 1)
+            "efficiency": round(efficiency * 100, 1)
         }

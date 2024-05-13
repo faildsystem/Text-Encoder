@@ -74,8 +74,38 @@ class LZWEncoder:
     def compute_efficiency(self):
         original_size = self.bits_before
         compressed_size = self.bits_after
-        return ((original_size - compressed_size) / original_size) * 100 if original_size > 0 else 0
+        return (original_size - compressed_size) / original_size if original_size > 0 else 0
 
+
+    def lzw_decompress(compressed):
+        if not compressed:
+            return ""
+
+        dictionary = {i: chr(i) for i in range(128)}  # ASCII characters from 0 to 127
+        current_code = 128  # Start new codes from 128
+        decompressed = []
+
+        previous = chr(compressed.pop(0))
+        decompressed.append(previous)
+
+        for code in compressed:
+            if code in dictionary:
+                entry = dictionary[code]
+            elif code == current_code:
+                entry = previous + previous[0]
+            else:
+                raise ValueError("Bad compressed sequence")
+
+            decompressed.append(entry)
+
+            if current_code < 256:  # Max code value in 0-128 range
+                dictionary[current_code] = previous + entry[0]
+                current_code += 1
+
+            previous = entry
+
+        return ''.join(decompressed)
+    
     def get_results(self):
         return {
             "encoded_text": self.encoded_string,
@@ -85,5 +115,13 @@ class LZWEncoder:
             "compression ratio (%)": round(self.compression_ratio * 100, 1),
             "probabilities": self.probabilities,
             "entropy": round(self.entropy, 3),
-            "efficiency": round(self.efficiency, 1),
+            "efficiency": round(self.efficiency * 100, 1),
         }
+
+
+
+# text = "wabbawabbadrewsr fyht g"
+# lzw = LZW(text)
+# print(lzw.get_results())
+# decompressed_text = LZW.lzw_decompress(lzw.encoded_string)
+# print("Decompressed text:", decompressed_text)

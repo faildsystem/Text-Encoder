@@ -78,9 +78,9 @@ class RunLengthEncoder:
         bits_after = number_of_vectors * (bits + math.ceil(math.log2(biggest_vector + 1))) + number_of_vectors * 8
         char_prob = Functions.calc_probabilities(text)
         entropy = Functions.calc_entropy(char_prob) 
-        compression_ratio = round((bits_before / bits_after) * 100, 2)
+        compression_ratio = round(bits_before / bits_after, 2)
         average_length = math.ceil(math.log2(biggest_vector + 1))
-        efficiency = (entropy / average_length) * 100
+        efficiency = (entropy / average_length)
 
         return {
             "encoded_text": encoded_string,
@@ -88,9 +88,9 @@ class RunLengthEncoder:
             "biggest_vector": biggest_vector,
             "bits_before": bits_before,
             "bits_after": bits_after,
-            "compression ratio (%)": round(compression_ratio, 1),
+            "compression ratio (%)": round(compression_ratio * 100, 1),
             "probabilities": char_prob,
             "entropy": round(entropy, 3),
             "average_length": average_length,
-            "efficiency": round(efficiency, 1),
+            "efficiency": round(efficiency * 100, 1),
         }
